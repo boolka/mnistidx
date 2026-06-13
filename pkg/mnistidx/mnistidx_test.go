@@ -1,39 +1,18 @@
 package mnistidx_test
 
 import (
+	"bytes"
 	"io"
-	"os"
 	"testing"
 
 	"github.com/boolka/mnistdb/pkg/mnistdb"
-	userMnistDb "github.com/boolka/mnistidx/pkg/internal"
 	"github.com/boolka/mnistidx/pkg/mnistidx"
 )
 
 func TestNotMatchIDX(t *testing.T) {
 	t.Parallel()
 
-	mdb, err := userMnistDb.NewUserMnistDb()
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	imagesFile, err := os.Open(mdb.GetDbPath(mnistdb.TestImagesDb))
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	labelsFile, err := os.Open(mdb.GetDbPath(mnistdb.TrainLabelsDb))
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	_, idxErr := mnistidx.NewIDX(imagesFile, labelsFile)
-
-	if idxErr == nil {
+	if _, err := mnistidx.NewIDX(bytes.NewReader(mnistdb.TestImages), bytes.NewReader(mnistdb.TrainLabels)); err == nil {
 		t.Fatal(err)
 	}
 }
@@ -41,34 +20,17 @@ func TestNotMatchIDX(t *testing.T) {
 func TestIDX(t *testing.T) {
 	t.Parallel()
 
-	mdb, err := userMnistDb.NewUserMnistDb()
-
+	idx, err := mnistidx.NewIDX(bytes.NewReader(mnistdb.TrainImages), bytes.NewReader(mnistdb.TrainLabels))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	imagesFile, err := os.Open(mdb.GetDbPath(mnistdb.TrainImagesDb))
+	buf := make([]byte, idx.ImageBufSize())
 
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	labelsFile, err := os.Open(mdb.GetDbPath(mnistdb.TrainLabelsDb))
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	i, err := mnistidx.NewIDX(imagesFile, labelsFile)
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	buf := make([]byte, i.ImageBufSize())
+	i := 0
 
 	for {
-		l, err := i.Read(buf)
+		l, err := idx.Read(buf)
 
 		if err == io.EOF {
 			break
@@ -81,5 +43,11 @@ func TestIDX(t *testing.T) {
 		if l < 0 || l > 9 {
 			t.Fatal(l)
 		}
+
+		i++
+	}
+
+	if i != 60_000 {
+		t.Fatal(i)
 	}
 }

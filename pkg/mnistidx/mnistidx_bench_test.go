@@ -1,45 +1,25 @@
 package mnistidx_test
 
 import (
+	"bytes"
 	"io"
-	"os"
 	"testing"
 
 	"github.com/boolka/mnistdb/pkg/mnistdb"
-	userMnistDb "github.com/boolka/mnistidx/pkg/internal"
 	"github.com/boolka/mnistidx/pkg/mnistidx"
 )
 
 func BenchmarkImageIDX(b *testing.B) {
-	mdb, err := userMnistDb.NewUserMnistDb()
-
-	if err != nil {
-		b.Fatal(err)
-	}
-
 	for i := 0; i < b.N; i++ {
-		imagesFile, err := os.Open(mdb.GetDbPath(mnistdb.TrainImagesDb))
-
+		idx, err := mnistidx.NewIDX(bytes.NewReader(mnistdb.TrainImages), bytes.NewReader(mnistdb.TrainLabels))
 		if err != nil {
 			b.Fatal(err)
 		}
 
-		labelsFile, err := os.Open(mdb.GetDbPath(mnistdb.TrainLabelsDb))
-
-		if err != nil {
-			b.Fatal(err)
-		}
-
-		i, err := mnistidx.NewIDX(imagesFile, labelsFile)
-
-		if err != nil {
-			b.Fatal(err)
-		}
-
-		buf := make([]byte, i.ImageBufSize())
+		buf := make([]byte, idx.ImageBufSize())
 
 		for {
-			l, err := i.Read(buf)
+			l, err := idx.Read(buf)
 
 			if err == io.EOF {
 				break

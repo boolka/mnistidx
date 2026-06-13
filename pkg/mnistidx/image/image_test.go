@@ -1,34 +1,20 @@
 package image_test
 
 import (
+	"bytes"
 	"io"
-	"os"
 	"testing"
 
 	"github.com/boolka/mnistdb/pkg/mnistdb"
-	userMnistDb "github.com/boolka/mnistidx/pkg/internal"
 	"github.com/boolka/mnistidx/pkg/mnistidx/image"
 )
 
 func TestImage(t *testing.T) {
 	t.Parallel()
 
-	mdb, err := userMnistDb.NewUserMnistDb()
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	f, err := os.Open(mdb.GetDbPath(mnistdb.TestImagesDb))
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	idx := image.NewIDXImage(f)
+	idx := image.NewIDXImage(bytes.NewReader(mnistdb.TestImages))
 
 	h, err := idx.ReadHeader()
-
 	if err != nil {
 		t.Fatal(err)
 	}

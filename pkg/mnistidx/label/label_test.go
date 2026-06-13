@@ -1,31 +1,18 @@
 package label_test
 
 import (
+	"bytes"
 	"io"
-	"os"
 	"testing"
 
 	"github.com/boolka/mnistdb/pkg/mnistdb"
-	userMnistDb "github.com/boolka/mnistidx/pkg/internal"
 	"github.com/boolka/mnistidx/pkg/mnistidx/label"
 )
 
 func TestLabel(t *testing.T) {
 	t.Parallel()
 
-	mdb, err := userMnistDb.NewUserMnistDb()
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	f, err := os.Open(mdb.GetDbPath(mnistdb.TestLabelsDb))
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	l := label.NewIDXLabel(f)
+	l := label.NewIDXLabel(bytes.NewBuffer(mnistdb.TestLabels))
 
 	h, err := l.ReadHeader()
 

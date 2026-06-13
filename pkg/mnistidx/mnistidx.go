@@ -29,13 +29,11 @@ func NewIDX(imagesReader, labelsReader io.Reader) (*MnistIDX, error) {
 	idxLabels := label.NewIDXLabel(labelsReader)
 
 	ih, err := idxImages.ReadHeader()
-
 	if err != nil {
 		return nil, err
 	}
 
 	lh, err := idxLabels.ReadHeader()
-
 	if err != nil {
 		return nil, err
 	}
@@ -67,13 +65,11 @@ func (i *MnistIDX) Read(buf image.ImageContent) (label.LabelContent, error) {
 	}
 
 	err := i.images.ReadImage(int(i.ImagesHeader.ImgCols), int(i.ImagesHeader.ImgRows), buf)
-
 	if err != nil {
 		return -1, err
 	}
 
 	l, err := i.labels.ReadContent()
-
 	if err != nil {
 		return -1, err
 	}

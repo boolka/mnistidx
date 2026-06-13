@@ -6,12 +6,12 @@ import (
 )
 
 type IDXLabel struct {
-	r io.Reader
+	io.Reader
 }
 
 func NewIDXLabel(r io.Reader) IDXLabel {
 	return IDXLabel{
-		r: r,
+		Reader: r,
 	}
 }
 
@@ -21,24 +21,22 @@ type LabelHeader struct {
 }
 
 func (i *IDXLabel) ReadHeader() (*LabelHeader, error) {
-	l := new(LabelHeader)
+	lh := new(LabelHeader)
 
-	err := binary.Read(i.r, binary.BigEndian, l)
-
+	err := binary.Read(i.Reader, binary.BigEndian, lh)
 	if err != nil {
 		return nil, err
 	}
 
-	return l, nil
+	return lh, nil
 }
 
 type LabelContent int8
 
 func (i *IDXLabel) ReadContent() (LabelContent, error) {
 	label := make([]byte, 1)
-	_, err := i.r.Read(label)
 
-	if err != nil {
+	if _, err := i.Reader.Read(label); err != nil {
 		return -1, err
 	}
 
